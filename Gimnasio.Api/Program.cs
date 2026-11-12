@@ -21,7 +21,10 @@ builder.Services.AddScoped<ISocioService, SocioService>();
 // 4) AutoMapper (un único MappingProfile en la capa de Negocio)
 builder.Services.AddAutoMapper(cfg => { }, typeof(MappingProfile));
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(o =>
+        // Devuelve tildes y apóstrofes legibles en el JSON (sin \u00E1, \u0027)
+        o.JsonSerializerOptions.Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping);
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
