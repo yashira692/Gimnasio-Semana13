@@ -36,5 +36,9 @@ public class MappingProfile : Profile
         CreateMap<SocioActualizarDto, Socio>()
             .ForMember(d => d.SocioId, o => o.Ignore())
             .ForMember(d => d.FechaInscripcion, o => o.Ignore());
+
+        // ===== USUARIO (SEMANA14) =====
+        // Entidad -> DTO de perfil: nunca se expone el ClaveHash
+        CreateMap<Usuario, PerfilDto>();
     }
 }

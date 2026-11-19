@@ -1,4 +1,4 @@
-# Gimnasio API — SEMANA13 (API en capas con DTOs y AutoMapper)
+# Gimnasio API — SEMANA13 + SEMANA14 (API en capas con DTOs, AutoMapper y autenticación JWT)
 
 Web API REST en capas con **ASP.NET Core (.NET 10)**, **Entity Framework Core 10** (base de datos primero) y **AutoMapper**.
 
@@ -42,3 +42,26 @@ Referencias: `Api → Negocio → Datos → Entidades`.
    dotnet user-secrets set "ConnectionStrings:GimnasioDB" "Server=(localdb)\MSSQLLocalDB;Database=GimnasioDB;Trusted_Connection=True;TrustServerCertificate=True" --project Gimnasio.Api
    ```
 3. `dotnet run --project Gimnasio.Api` y abrir `http://localhost:5080/swagger`.
+
+## SEMANA14: autenticación JWT y roles
+
+Roles propios del gimnasio (los asigna el servidor, nunca el cliente):
+- **Recepcionista**: registra y actualiza socios, consulta planes y socios. Toda cuenta nueva nace con este rol.
+- **Gerente**: además crea, edita y elimina planes, y es el único que puede eliminar socios.
+
+| Endpoint | Sin token | Recepcionista | Gerente |
+|---|---|---|---|
+| POST /api/auth/registro, POST /api/auth/login | Sí | Sí | Sí |
+| GET /api/planes, GET /api/planes/{id} | Sí | Sí | Sí |
+| GET /api/auth/perfil | No (401) | Sí | Sí |
+| GET /api/socios, GET /api/socios/{id}, GET /api/planes/{id}/socios | No (401) | Sí | Sí |
+| POST /api/socios, PUT /api/socios/{id} | No (401) | Sí | Sí |
+| POST, PUT, DELETE /api/planes | No (401) | No (403) | Sí |
+| DELETE /api/socios/{id} | No (401) | No (403) | Sí |
+
+Configuración: la sección `Jwt` (emisor, audiencia, minutos) está en `appsettings.json`.
+La clave secreta **no** está en el repositorio; se configura con User Secrets:
+```
+dotnet user-secrets set "Jwt:Clave" "<clave de al menos 32 caracteres>" --project Gimnasio.Api
+```
+Usuarios de prueba del script SQL: `gerente@gimnasio.pe` (Gerente2026*) y `recepcion@gimnasio.pe` (Recepcion2026*).

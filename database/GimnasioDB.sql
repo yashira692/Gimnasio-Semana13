@@ -1,5 +1,5 @@
 -- =============================================
--- Base de datos: GimnasioDB  (SEMANA13)
+-- Base de datos: GimnasioDB  (SEMANA13 + SEMANA14: usuarios y JWT)
 -- Tema: Gimnasio - Planes de membresia y Socios (1:N)
 -- =============================================
 IF DB_ID('GimnasioDB') IS NOT NULL
@@ -52,6 +52,35 @@ INSERT INTO Socio (Nombres, Apellidos, Dni, Email, FechaInscripcion, Activo, Pla
 (N'Joaquín',  N'Vargas León',     '76789012', 'joaquin.vargas@gmail.com', '2026-10-28', 1, 3);
 GO
 
+-- =============================================
+-- SEMANA14: usuarios del sistema (autenticación JWT)
+-- Roles propios del gimnasio: Recepcionista y Gerente
+-- La clave se guarda como hash BCrypt (nunca en texto)
+-- =============================================
+CREATE TABLE Usuario (
+    UsuarioId      INT IDENTITY(1,1) CONSTRAINT PK_Usuario PRIMARY KEY,
+    Correo         NVARCHAR(100) NOT NULL CONSTRAINT UQ_Usuario_Correo UNIQUE,
+    ClaveHash      VARCHAR(100)  NOT NULL,
+    Rol            VARCHAR(20)   NOT NULL
+        CONSTRAINT CK_Usuario_Rol CHECK (Rol IN ('Recepcionista', 'Gerente')),
+    FechaRegistro  DATETIME2     NOT NULL
+);
+GO
+
+-- Usuarios de prueba (uno por rol). Claves de prueba:
+--   gerente@gimnasio.pe    -> Gerente2026*
+--   recepcion@gimnasio.pe  -> Recepcion2026*
+-- Hash BCrypt (work factor 11). Toda cuenta registrada por la API nace como
+-- Recepcionista; para tener un Gerente se cambia el rol con un UPDATE.
+INSERT INTO Usuario (Correo, ClaveHash, Rol, FechaRegistro) VALUES
+('gerente@gimnasio.pe',   '$2a$11$0yqCl4f/1J6FfkjsoCokROOcvEdKHrswO7gNnHCsYU9IIY1rFLweq', 'Recepcionista', SYSUTCDATETIME()),
+('recepcion@gimnasio.pe', '$2a$11$HOjTme6xkaM6hshfNPa.l.yB8EamNM5W51BGFPpY74btG9cw4LylG', 'Recepcionista', SYSUTCDATETIME());
+GO
+
+UPDATE Usuario SET Rol = 'Gerente' WHERE Correo = 'gerente@gimnasio.pe';
+GO
+
 SELECT * FROM [Plan];
 SELECT * FROM Socio;
+SELECT UsuarioId, Correo, Rol FROM Usuario;
 GO

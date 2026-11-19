@@ -1,12 +1,15 @@
 using Gimnasio.Entidades.DTOs;
 using Gimnasio.Negocio.Excepciones;
+using Gimnasio.Negocio.Seguridad;
 using Gimnasio.Negocio.Servicios;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Gimnasio.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize] // todos los endpoints de socios exigen token
 public class SociosController : ControllerBase
 {
     private readonly ISocioService _service;
@@ -33,8 +36,9 @@ public class SociosController : ControllerBase
         return Ok(socio);
     }
 
-    // POST api/socios
+    // POST api/socios  (Recepcionista o Gerente)
     [HttpPost]
+    [Authorize(Roles = Roles.Recepcionista + "," + Roles.Gerente)]
     public async Task<ActionResult<SocioDto>> Crear(SocioCrearDto dto)
     {
         try
@@ -48,8 +52,9 @@ public class SociosController : ControllerBase
         }
     }
 
-    // PUT api/socios/5
+    // PUT api/socios/5  (Recepcionista o Gerente)
     [HttpPut("{id:int}")]
+    [Authorize(Roles = Roles.Recepcionista + "," + Roles.Gerente)]
     public async Task<IActionResult> Actualizar(int id, SocioActualizarDto dto)
     {
         try
@@ -64,8 +69,9 @@ public class SociosController : ControllerBase
         }
     }
 
-    // DELETE api/socios/5
+    // DELETE api/socios/5  (solo Gerente)
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = Roles.Gerente)]
     public async Task<IActionResult> Eliminar(int id)
     {
         var ok = await _service.EliminarAsync(id);

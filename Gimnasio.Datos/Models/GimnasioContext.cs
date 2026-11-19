@@ -16,6 +16,8 @@ public partial class GimnasioContext : DbContext
 
     public virtual DbSet<Socio> Socios { get; set; }
 
+    public virtual DbSet<Usuario> Usuarios { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Plan>(entity =>
@@ -47,6 +49,23 @@ public partial class GimnasioContext : DbContext
                 .HasForeignKey(d => d.PlanId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Socio_Plan");
+        });
+
+        // Tabla Usuario (agregada en la SEMANA14 para la autenticación JWT)
+        modelBuilder.Entity<Usuario>(entity =>
+        {
+            entity.ToTable("Usuario");
+
+            entity.HasIndex(e => e.Correo, "UQ_Usuario_Correo").IsUnique();
+
+            entity.Property(e => e.Correo).HasMaxLength(100);
+            entity.Property(e => e.ClaveHash)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.Rol)
+                .HasMaxLength(20)
+                .IsUnicode(false);
+            entity.Property(e => e.FechaRegistro).HasColumnType("datetime2");
         });
 
         OnModelCreatingPartial(modelBuilder);

@@ -1,12 +1,15 @@
 using Gimnasio.Entidades.DTOs;
 using Gimnasio.Negocio.Excepciones;
+using Gimnasio.Negocio.Seguridad;
 using Gimnasio.Negocio.Servicios;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Gimnasio.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize] // por defecto: solo autenticados
 public class PlanesController : ControllerBase
 {
     private readonly IPlanService _service;
@@ -16,15 +19,17 @@ public class PlanesController : ControllerBase
         _service = service;
     }
 
-    // GET api/planes
+    // GET api/planes  (público)
     [HttpGet]
+    [AllowAnonymous]
     public async Task<ActionResult<List<PlanDto>>> Listar()
     {
         return Ok(await _service.ListarAsync());
     }
 
-    // GET api/planes/5
+    // GET api/planes/5  (público)
     [HttpGet("{id:int}")]
+    [AllowAnonymous]
     public async Task<ActionResult<PlanDto>> Obtener(int id)
     {
         var plan = await _service.ObtenerAsync(id);
@@ -32,7 +37,7 @@ public class PlanesController : ControllerBase
         return Ok(plan);
     }
 
-    // GET api/planes/5/socios  (ruta anidada)
+    // GET api/planes/5/socios  (ruta anidada, solo autenticados)
     [HttpGet("{id:int}/socios")]
     public async Task<ActionResult<List<SocioDto>>> ListarSocios(int id)
     {
@@ -41,8 +46,9 @@ public class PlanesController : ControllerBase
         return Ok(socios);
     }
 
-    // POST api/planes
+    // POST api/planes  (solo Gerente)
     [HttpPost]
+    [Authorize(Roles = Roles.Gerente)]
     public async Task<ActionResult<PlanDto>> Crear(PlanCrearDto dto)
     {
         try
@@ -56,8 +62,9 @@ public class PlanesController : ControllerBase
         }
     }
 
-    // PUT api/planes/5
+    // PUT api/planes/5  (solo Gerente)
     [HttpPut("{id:int}")]
+    [Authorize(Roles = Roles.Gerente)]
     public async Task<IActionResult> Actualizar(int id, PlanActualizarDto dto)
     {
         try
@@ -72,8 +79,9 @@ public class PlanesController : ControllerBase
         }
     }
 
-    // DELETE api/planes/5
+    // DELETE api/planes/5  (solo Gerente)
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = Roles.Gerente)]
     public async Task<IActionResult> Eliminar(int id)
     {
         try
